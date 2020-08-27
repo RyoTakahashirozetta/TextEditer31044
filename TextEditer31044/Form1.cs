@@ -69,26 +69,30 @@ namespace TextEditer31044
             if (sfdFileSave.ShowDialog() == DialogResult.OK)
             {
                 FileSave(sfdFileSave.FileName);
-            }
+             }
         }
 
         //ファイル名を指定しデータを保存
         private void FileSave(string fileName)
         {
-            using (StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding("utf-8")))
-            {
-                sw.WriteLine(rtTextArea.Text);
-            }
+            //using (StreamWriter sw = new StreamWriter(fileName, false, Encoding.GetEncoding("utf-8")))
+            //{
+            //    sw.WriteLine(rtTextArea.Text);
+            //}
+            rtTextArea.SaveFile(fileName, RichTextBoxStreamType.RichText);
         }
 
 
         private void UndoUToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            
             if (rtTextArea.CanUndo == true)
             {
                 rtTextArea.Undo();
             }
         }
+
+
 
         private void RedoToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -102,32 +106,124 @@ namespace TextEditer31044
         {
             if (rtTextArea.SelectionLength > 0)
             {
+                
                 rtTextArea.Cut();
+                PasteToolStripMenuItem.Enabled = true;
             }
         }
 
         private void CopyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (rtTextArea.SelectionLength > 0)
-            {
+            {               
                 rtTextArea.Copy();
+                PasteToolStripMenuItem.Enabled = true;
             }
         }
 
         private void PasteToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            IDataObject data = Clipboard.GetDataObject();
-            if (data != null && data.GetDataPresent(DataFormats.Text) == true)
-            {
-                rtTextArea.Paste();
-            }
+        {          
+                rtTextArea.Paste();                      
         }
 
         private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (rtTextArea.SelectionLength > 0)
             {
-                
+                rtTextArea.SelectedText = "";
+            }
+        }
+
+        private void NewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rtTextArea.ResetText();
+        }
+
+        private void rtTextArea_TextChanged(object sender, EventArgs e)
+        {
+            UndoUToolStripMenuItem.Enabled = true;   
+        }
+
+        private void rtTextArea_SelectionChanged(object sender, EventArgs e)
+        {
+            if (rtTextArea.SelectionLength > 0)
+            {
+                CopyToolStripMenuItem.Enabled = true;
+                CutToolStripMenuItem.Enabled = true;
+                DeleteToolStripMenuItem.Enabled = true;
+            }
+            else
+            {
+                CopyToolStripMenuItem.Enabled = false;
+                CutToolStripMenuItem.Enabled = false;
+                DeleteToolStripMenuItem.Enabled = false;
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text))
+            {
+                PasteToolStripMenuItem.Enabled = true;
+            }          
+        }
+
+        private void NewToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            if (rtTextArea.Text != "")
+            {
+                DialogResult dr = MessageBox.Show("変更内容を保存しますか？", "メッセージ", MessageBoxButtons.YesNoCancel);
+                if (dr == System.Windows.Forms.DialogResult.Yes)
+                {
+                    SaveSToolStripMenuItem_Click(sender, e);
+                }
+                else if (dr == System.Windows.Forms.DialogResult.No)
+                {
+                    rtTextArea.ResetText();
+                }
+                else if (dr == System.Windows.Forms.DialogResult.Cancel)
+                {
+                    
+                }
+            }      
+        }
+
+
+        private void ColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (cdCcolor.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                rtTextArea.SelectionColor = cdCcolor.Color;
+            }
+        }
+
+        private void FontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (fdFont.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                rtTextArea.SelectionFont = fdFont.Font;
+            }
+        }
+
+        private void EditToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RedoToolStripMenuItem.Enabled = rtTextArea.CanRedo;
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult dr = MessageBox.Show("変更内容を保存しますか？", "メッセージ", MessageBoxButtons.YesNoCancel);
+            if (dr == System.Windows.Forms.DialogResult.Yes)
+            {
+                SaveSToolStripMenuItem_Click(sender, e);
+            }
+            else if (dr == System.Windows.Forms.DialogResult.No)
+            {
+                rtTextArea.ResetText();
+            }
+            else if (dr == System.Windows.Forms.DialogResult.Cancel)
+            {
+
             }
         }
     }
